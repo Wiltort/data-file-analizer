@@ -4,6 +4,8 @@ from .extensions import db
 from .models import DataFile, DataAnalysis, AnalysisTask
 from werkzeug.utils import secure_filename
 from datetime import datetime
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 bp = Blueprint("api", __name__, url_prefix="/api/v1")
 
@@ -15,14 +17,18 @@ def allowed_file(filename: str) -> bool:
 
 def save_file(file):
     filename = secure_filename(file.filename)
-    filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+    upload_dir = current_app.config["UPLOAD_FOLDER"]
+    base, ext = os.path.splitext(filename)
+    counter = 1
+    new_filename = filename
+
+    while os.path.exists(os.path.join(upload_dir, new_filename)):
+        new_filename = f"{base} ({counter}){ext}"
+        counter += 1
+
+    filepath = os.path.join(upload_dir, new_filename)
     file.save(filepath)
-    return filename, filepath
-
-
-@bp.route("/test", methods=["GET"])
-def test():
-    return jsonify({"message": "HELLO"})
+    return new_filename, filepath
 
 
 @bp.route("/upload", methods=["POST"])
@@ -40,7 +46,6 @@ def upload_file():
 
     try:
         filename, filepath = save_file(file)
-
         # Сохраняем метаданные в БД
         new_file = DataFile(
             filename=filename,
@@ -63,4 +68,15 @@ def upload_file():
         )
     except Exception as e:
         db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+@bp.route("/data/<int:file_id>/stats", methods=["GET"])
+def get_stats(file_id):
+    """Gets data summary"""
+    try:
+        data_file = db.session.get(DataFile, file_id)
+        return data_file.filename
+
+    except Exception as e:
         return jsonify({"error": str(e)}), 500

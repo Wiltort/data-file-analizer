@@ -12,7 +12,7 @@ class DataFile(Base):
     __tablename__ = 'data_files'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    filename: Mapped[str] = mapped_column(String(256), nullable=False)
+    filename: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
     file_type: Mapped[str] = mapped_column(String(10), nullable=False)  # ['csv', 'xlsx', 'xls']
     upload_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     file_size: Mapped[int] = mapped_column(Integer)  # Размер файла в байтах
