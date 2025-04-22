@@ -1,11 +1,9 @@
 from datetime import datetime
-from sqlalchemy import ForeignKey, String, Integer, DateTime, Text, LargeBinary
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import String, Integer, DateTime, Text, LargeBinary, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
+from .extensions import db, Base
 
-
-class Base(DeclarativeBase):
-    pass
 
 class DataFile(Base):
     """
@@ -21,7 +19,7 @@ class DataFile(Base):
     original_filename: Mapped[str] = mapped_column(String(256))
     
     # Связь с анализом данных
-    analyses: Mapped[list["DataAnalysis"]] = relationship(back_populates="data_file", lazy=True)
+    analyses: Mapped[list["DataAnalysis"]] = db.relationship(back_populates="data_file", lazy=True)
     
     def __repr__(self):
         return f'<DataFile {self.filename}>'
@@ -52,8 +50,8 @@ class DataAnalysis(Base):
     cleaning_report: Mapped[dict | None] = mapped_column(JSONB)
     
     # Связи
-    data_file: Mapped["DataFile"] = relationship(back_populates="analyses")
-    plots: Mapped[list["DataPlot"]] = relationship(back_populates="data_analysis", lazy=True)
+    data_file: Mapped["DataFile"] = db.relationship(back_populates="analyses")
+    plots: Mapped[list["DataPlot"]] = db.relationship(back_populates="data_analysis", lazy=True)
     
     def __repr__(self):
         return f'<DataAnalysis {self.analysis_type} for file {self.data_file_id}>'
@@ -73,7 +71,7 @@ class DataPlot(Base):
     columns_used: Mapped[dict | None] = mapped_column(JSONB)  # Колонки, использованные для построения графика
     
     # Связи
-    data_analysis: Mapped["DataAnalysis"] = relationship(back_populates="plots")
+    data_analysis: Mapped["DataAnalysis"] = db.relationship(back_populates="plots")
     
     def __repr__(self):
         return f'<DataPlot {self.plot_type} for analysis {self.analysis_id}>'
