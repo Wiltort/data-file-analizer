@@ -5,8 +5,6 @@ from flask import current_app
 
 from alembic import context
 
-from app.extensions import Base
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -101,7 +99,7 @@ def run_migrations_online():
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
-            target_metadata=Base.metadata,
+            target_metadata=get_metadata(),
             **conf_args
         )
 
