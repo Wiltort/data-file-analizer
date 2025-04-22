@@ -17,8 +17,8 @@ def create_app(config_class='config.Config'):
             Base.metadata.create_all(db.engine)
 
     # Регистрация blueprints
-    # from app.routes import bp as main_bp
-    # app.register_blueprint(main_bp)
+    from app.routes import bp as main_bp
+    app.register_blueprint(main_bp)
 
     @app.route('/test')
     def test_page():
