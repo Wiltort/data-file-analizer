@@ -55,6 +55,5 @@ def upload_file():
             'message': 'File uploaded successfully'
         }), 201
     except Exception as e:
-        print(e)
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
