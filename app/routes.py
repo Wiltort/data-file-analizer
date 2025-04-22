@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 from flask import Blueprint, jsonify, request, current_app
 from .extensions import db
 from .models import DataFile, DataAnalysis, AnalysisTask
@@ -9,6 +10,11 @@ from sqlalchemy.orm import Session
 
 bp = Blueprint("api", __name__, url_prefix="/api/v1")
 
+
+reading_methods = {
+    'csv': pd.read_csv,
+    'xlsx': pd.read_excel
+}
 
 def allowed_file(filename: str) -> bool:
     extensions = current_app.config["ALLOWED_EXTENSIONS"]
@@ -76,6 +82,9 @@ def get_stats(file_id):
     """Gets data summary"""
     try:
         data_file = db.session.get(DataFile, file_id)
+        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], data_file.filename)
+        df = reading_methods.get(data_file.file_type)(filepath)
+        # TODO Здесь дописать
         return data_file.filename
 
     except Exception as e:
