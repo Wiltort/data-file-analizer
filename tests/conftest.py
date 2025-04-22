@@ -2,6 +2,7 @@ import pytest
 from io import BytesIO
 import os
 import sys
+from sqlalchemy_utils import create_database, database_exists
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -13,7 +14,11 @@ import pandas as pd
 @pytest.fixture(scope='module')
 def app():
     """Фикстура приложения"""
+    if not os.path.exists(TestConfig.UPLOAD_FOLDER):
+        os.makedirs(TestConfig.UPLOAD_FOLDER, exist_ok=True)
     app = create_app(TestConfig)
+    if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
+        create_database(app.config['SQLALCHEMY_DATABASE_URI'])
     with app.app_context():
         _db.create_all()
     yield app

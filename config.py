@@ -8,12 +8,15 @@ class Config:
     UPLOAD_FOLDER = 'uploads'
     ALLOWED_EXTENSIONS = {'csv', 'xlsx'}
     MIGRATIONS_DIR = os.path.join(os.path.dirname(__file__), 'migrations')
+    
 
 
 class TestConfig:
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
+        'postgresql+psycopg://username:password@localhost/test_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'test_uploads')
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'tests', 'test_uploads')
     CELERY_BROKER_URL = 'memory://'
     CELERY_RESULT_BACKEND = 'cache+memory://'
+    ALLOWED_EXTENSIONS = {'csv', 'xlsx'}

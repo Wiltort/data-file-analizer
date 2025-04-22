@@ -14,7 +14,7 @@ class DataFile(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     filename: Mapped[str] = mapped_column(String(256), nullable=False)
     file_type: Mapped[str] = mapped_column(String(10), nullable=False)  # ['csv', 'xlsx', 'xls']
-    upload_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    upload_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     file_size: Mapped[int] = mapped_column(Integer)  # Размер файла в байтах
     original_filename: Mapped[str] = mapped_column(String(256))
     
@@ -33,7 +33,7 @@ class DataAnalysis(Base):
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     data_file_id: Mapped[int] = mapped_column(ForeignKey('data_files.id'), nullable=False)
-    analysis_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    analysis_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     analysis_type: Mapped[str | None] = mapped_column(String(50))  # 'basic_stats', 'cleaning', 'correlation' и т.д.
     
     # Статистические данные в JSON формате
