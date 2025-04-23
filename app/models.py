@@ -67,7 +67,7 @@ class DataPlot(Base):
     plot_type: Mapped[str | None] = mapped_column(String(50))  # 'histogram', 'scatter', 'boxplot' и т.д.
     plot_data: Mapped[bytes | None] = mapped_column(LargeBinary)  # Бинарные данные изображения (для PNG)
     plot_json: Mapped[dict | None] = mapped_column(JSONB)  # Данные для построения графика на клиенте
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     columns_used: Mapped[dict | None] = mapped_column(JSONB)  # Колонки, использованные для построения графика
     
     # Связи
@@ -86,8 +86,8 @@ class AnalysisTask(Base):
     task_id: Mapped[str] = mapped_column(String(36), unique=True)  # UUID задачи
     data_file_id: Mapped[int | None] = mapped_column(ForeignKey('data_files.id'))
     task_type: Mapped[str | None] = mapped_column(String(50))
-    status: Mapped[str] = mapped_column(String(20), default='pending')  # 'pending', 'processing', 'completed', 'failed'
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    status: Mapped[str] = mapped_column(String(20), default='PENDING')  # 'pending', 'processing', 'completed', 'failed'
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime)
     result: Mapped[dict | None] = mapped_column(JSONB)  # Результат выполнения задачи
     error: Mapped[str | None] = mapped_column(Text)  # Сообщение об ошибке, если есть
