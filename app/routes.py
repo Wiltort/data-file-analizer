@@ -1,11 +1,8 @@
 import os
-import pandas as pd
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request
 from .extensions import db
-from .models import DataFile, DataAnalysis
+from .models import DataFile
 from datetime import datetime
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 from app.utils.data_processor import allowed_file, save_file, analyze_data
 
 bp = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -60,5 +57,4 @@ def get_stats(file_id):
         return jsonify(stats)
 
     except Exception as e:
-        print(e)
         return jsonify({"error": str(e)}), 500

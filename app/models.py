@@ -68,9 +68,9 @@ class DataAnalysis(Base):
     def __repr__(self):
         return f"<DataAnalysis {self.analysis_type} for file {self.data_file_id}>"
 
-    def get_stats(self):
+    def get_data(self):
         if self.analysis_type == "basic_stats":
-            stats = {
+            data = {
                 "mean": self.stats_mean,
                 "median": self.stats_median,
                 "correlation": self.stats_correlation,
@@ -78,7 +78,14 @@ class DataAnalysis(Base):
                 "min": self.stats_min,
                 "max": self.stats_max,
             }
-            return stats
+            return data
+        if self.analysis_type == "cleaning":
+            data = {
+                'duplicates_removed': self.duplicates_removed,
+                'missing_values_filled': self.missing_values_filled,
+                'cleaning_report': self.cleaning_report
+            }
+            return data
         raise RuntimeError("Invalid analysis type")
 
 
