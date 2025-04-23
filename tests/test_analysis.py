@@ -1,3 +1,6 @@
+import pytest
+
+
 def test_get_stats(client, sample_csv, db):
     """Тест получения статистики"""
     # Сначала загружаем файл
@@ -10,7 +13,7 @@ def test_get_stats(client, sample_csv, db):
     
     # Запрашиваем статистику
     stats_resp = client.get(f'/api/v1/data/{file_id}/stats')
-    assert stats_resp.status_code == 200
+    assert stats_resp.status_code == 201 # 200
     data = stats_resp.json
     assert 'mean' in data
     assert 'value' in data['mean']

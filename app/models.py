@@ -55,6 +55,21 @@ class DataAnalysis(Base):
     
     def __repr__(self):
         return f'<DataAnalysis {self.analysis_type} for file {self.data_file_id}>'
+    
+    def get_stats(self):
+        if self.analysis_type == 'basic_stats':
+            stats = {
+                'mean': self.stats_mean,
+                'median': self.stats_median,
+                'correllation': self.stats_correlation,
+                'std': self.stats_std,
+                'min': self.stats_min,
+                'max': self.stats_max
+            }
+            return stats
+        raise RuntimeError('Invalid analysis type')
+            
+
 
 class DataPlot(Base):
     """

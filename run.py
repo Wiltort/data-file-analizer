@@ -1,19 +1,8 @@
 import os
 from app import create_app
 from config import Config
-from celery import Celery
-
-def make_celery(app):
-    celery = Celery(
-        app.import_name,
-        backend=app.config['CELERY_RESULT_BACKEND'],
-        broker=app.config['CELERY_BROKER_URL']
-    )
-    celery.conf.update(app.config)
-    return celery
 
 app = create_app(Config)
-celery = make_celery(app=app)
 
 if __name__ == '__main__':
     # Создаем папку для загрузок, если ее нет
