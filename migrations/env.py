@@ -97,9 +97,10 @@ def run_migrations_online():
     connectable = get_engine()
 
     with connectable.connect() as connection:
+        from app.models import Base  # Импортируем ваш Base
         context.configure(
             connection=connection,
-            target_metadata=get_metadata(),
+            target_metadata=Base.metadata,
             **conf_args
         )
 

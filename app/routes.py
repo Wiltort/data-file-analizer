@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from flask import Blueprint, jsonify, request, current_app
 from .extensions import db
-from .models import DataFile, DataAnalysis, AnalysisTask
+from .models import DataFile, DataAnalysis
 from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -48,6 +48,7 @@ def upload_file():
         )
     except Exception as e:
         db.session.rollback()
+        print(e)
         return jsonify({"error": str(e)}), 500
 
 
