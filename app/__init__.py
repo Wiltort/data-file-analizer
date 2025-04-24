@@ -14,7 +14,6 @@ def create_app(config_class='config.Config'):
     with app.app_context():
         if not database_exists(db.engine.url):
             create_database(db.engine.url)
-            Base.metadata.create_all(db.engine)
 
     # Регистрация blueprints
     from app.routes import bp as main_bp
