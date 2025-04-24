@@ -123,7 +123,7 @@ def analyze_data(file_id: int) -> dict:
 def clean_data(
     file_id: int,
     handle_duplicates: str = "drop",  # ['drop', 'keep']
-    fill_missing: str | None = None,
+    fill_missing: str = 'mean',
     force: bool = False,
 ) -> Dict[str, Any]:
     """
@@ -196,24 +196,28 @@ def clean_data(
         )
     
     # 2. Заполнение пропущенных значений
-    missing_before = df.isnull().sum().to_dict()
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    missing_before = df[numeric_cols].isnull().sum().to_dict()
+
     if fill_missing == 'mean':
-        fill_values = df.mean()
+        fill_values = df[numeric_cols].mean()
     elif fill_missing == 'median':
-        fill_values = df.median()
+        fill_values = df[numeric_cols].median()
     elif fill_missing == 'zero':
         fill_values = 0
     else:
         raise ValueError("Invalid fill_missing. Valid: 'mean', 'median', 'zero'")
-    df = df.fillna(fill_values)
-    missing_after = df.isnull().sum().to_dict()
-    data["missing_values_filled"] = missing_before - missing_after
+    
+    df[numeric_cols] = df[numeric_cols].fillna(fill_values)
+    missing_after = df[numeric_cols].isnull().sum().to_dict()
+
+    data["missing_values_filled"] = sum(missing_before.values()) - sum(missing_after.values())
     data['cleaning_report']['missing_values_filled'] = {
         'before': missing_before,
         'after': missing_after,
         'method': fill_missing
     }
-    data['missing_values_filled']['actions_performed'].append('missing_values_filled')
+    data['cleaning_report']['actions_performed'].append('missing_values_filled')
 
     # 3. Сохранение очищенных данных
     cleaned_filename = f"cleaned_{data_file.filename}"
@@ -240,7 +244,6 @@ def clean_data(
         file_size=os.path.getsize(filepath),
         original_filename=data_file.filename,
         upload_date=datetime.now(),
-        is_cleaned=True
     )
     db.session.add(cleaned_data_file)
     db.session.commit()
@@ -256,6 +259,7 @@ def clean_data(
     )
     db.session.add(cleaning_analysis)
     db.session.commit()
+    return data
 
 
 
