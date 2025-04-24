@@ -16,11 +16,31 @@ reading_methods = {"csv": pd.read_csv, "xlsx": pd.read_excel}
 
 
 def allowed_file(filename: str) -> bool:
+    """
+    Check if a filename has an allowed extension based on app configuration.
+    
+    Args:
+        filename: Original filename to validate
+        
+    Returns:
+        bool: True if extension is allowed, False otherwise
+    """
     extensions = current_app.config["ALLOWED_EXTENSIONS"]
     return "." in filename and filename.rsplit(".", 1)[1].lower() in extensions
 
 
-def save_file(file):
+def save_file(file: FileStorage) -> tuple[str, str]:
+    """
+    Save uploaded file with unique filename to prevent overwrites.
+    
+    Generates sequential filenames if duplicate exists (e.g., "file (1).csv").
+    
+    Args:
+        file: Werkzeug FileStorage object to save
+        
+    Returns:
+        tuple: (unique_filename, full_filepath)
+    """    
     filename = secure_filename(file.filename)
     upload_dir = current_app.config["UPLOAD_FOLDER"]
     base, ext = os.path.splitext(filename)
@@ -36,7 +56,21 @@ def save_file(file):
     return new_filename, filepath
 
 
-def analyze_data(file_id: int):
+def analyze_data(file_id: int) -> dict:
+    """
+    Perform basic statistical analysis on a data file.
+    
+    Checks for existing analysis in database before computing new statistics.
+    
+    Args:
+        file_id: ID of DataFile record to analyze
+        
+    Returns:
+        dict: Statistical results including mean, median, correlation, etc.
+        
+    Raises:
+        RuntimeError: If file processing fails
+    """
     analysis_type = "basic_stats"
     stmt = select(DataAnalysis).where(
         DataAnalysis.data_file_id == file_id,
@@ -92,6 +126,26 @@ def clean_data(
     fill_missing: str | None = None,
     force: bool = False,
 ) -> Dict[str, Any]:
+    """
+    Clean data by handling duplicates and missing values.
+    
+    Args:
+        file_id: ID of DataFile record to clean
+        handle_duplicates: 'drop' to remove or 'keep' to preserve duplicates
+        fill_missing: Strategy for missing values ('mean', 'median', 'zero')
+        force: Set True to force re-cleaning even if existing analysis exists
+        
+    Returns:
+        dict: Cleaning report with metrics and new file information
+        
+    Raises:
+        ValueError: For invalid cleaning parameters
+        RuntimeError: If file processing fails
+        
+    Creates:
+        - New DataFile entry for cleaned data
+        - DataAnalysis record of cleaning operation
+    """
     analysis_type = "cleaning"
     if not force:
         stmt = select(DataAnalysis).where(
@@ -153,12 +207,13 @@ def clean_data(
         raise ValueError("Invalid fill_missing. Valid: 'mean', 'median', 'zero'")
     df = df.fillna(fill_values)
     missing_after = df.isnull().sum().to_dict()
-    data['missing_values_filled'] = {
+    data["missing_values_filled"] = missing_before - missing_after
+    data['cleaning_report']['missing_values_filled'] = {
         'before': missing_before,
         'after': missing_after,
         'method': fill_missing
     }
-    report['actions_performed'].append('missing_values_filled')
+    data['missing_values_filled']['actions_performed'].append('missing_values_filled')
 
     # 3. Сохранение очищенных данных
     cleaned_filename = f"cleaned_{data_file.filename}"
@@ -189,6 +244,18 @@ def clean_data(
     )
     db.session.add(cleaned_data_file)
     db.session.commit()
+    data['cleaning_report']["cleaned_file_id"] = cleaned_data_file.id
+    data['cleaning_report']["cleaned_filename"] = new_filename
+    cleaning_analysis = DataAnalysis(
+        data_file_id=file_id,
+        analysis_date=datetime.now(),
+        analysis_type=analysis_type,
+        duplicates_removed=data["duplicates_removed"],
+        missing_values_filled=data["missing_values_filled"],
+        cleaning_report=data["cleaning_report"],
+    )
+    db.session.add(cleaning_analysis)
+    db.session.commit()
 
-    report["cleaned_file_id"] = cleaned_data_file.id
-    report["cleaned_filename"] = new_filename
+
+
