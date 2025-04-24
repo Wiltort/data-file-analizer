@@ -6,10 +6,11 @@ from sqlalchemy import select
 from werkzeug.utils import secure_filename
 import os
 from app.extensions import db
-from app.models import DataFile, DataAnalysis
+from app.models import DataFile, DataAnalysis, DataPlot
 from werkzeug.datastructures import FileStorage
 from io import BytesIO
 import tempfile
+import matplotlib.pyplot as plt
 
 
 reading_methods = {"csv": pd.read_csv, "xlsx": pd.read_excel}
@@ -261,5 +262,59 @@ def clean_data(
     db.session.commit()
     return data
 
-
-
+def generate_plot(
+        file_id: int,
+        column: str,
+        plot_type: str,
+        x: str | None
+):  
+    stmt = select(DataPlot).where(
+        DataPlot.data_file_id == file_id,
+        DataPlot.plot_type == plot_type,
+        DataPlot.columns_used.has_key(column))
+    plot = db.session.scalar(stmt)
+    if plot:
+        img = BytesIO(plot.plot_data)
+        img.seek(0)
+        return img
+    data_file = db.session.get(DataFile, file_id)
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], data_file.filename)
+    first_row = reading_methods.get(data_file.file_type)(
+        filepath, header=None, nrows=1
+    )
+    if all(isinstance(x, str) for x in first_row.values[0]):
+        header = 0
+    else:
+        header = None
+    df = reading_methods.get(data_file.file_type)(filepath, header=header)
+    if header is None:
+        df.columns = [f"Column {col}" for col in df.columns]
+    plt.figure()
+    columns = [column]
+    if plot_type == 'histogram':
+        df[column].hist()
+        plt.title(f'Histogram of {column}')
+    elif plot_type == 'scatter':
+        if x is None:
+            x_col = df.columns[0]
+        else:
+            x_col = x
+        columns.append(x_col)
+        plt.scatter(df[x_col], df[column])
+        plt.title(f'Scatter plot: {x_col} vs {column}')
+    img = BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plt.close()
+    img_data = img.getvalue()
+    # Сохранение информации о графике в БД
+    plot = DataPlot(
+        data_file_id=file_id,
+        plot_type=plot_type,
+        plot_data=img_data,
+        columns_used=df[columns].fillna(0).to_dict()
+        # plot_json для фронта 
+    )
+    db.session.add(plot)
+    db.session.commit()
+    return img

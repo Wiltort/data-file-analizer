@@ -119,3 +119,4 @@ class DataPlot(Base):
 
     def __repr__(self):
         return f"<DataPlot {self.plot_type} for analysis {self.analysis_id}>"
+    
