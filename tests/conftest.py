@@ -46,7 +46,13 @@ def db(app):
 def sample_csv():
     """Генерация тестового CSV"""
     data = BytesIO()
-    df = pd.DataFrame({"id": [1, 2, 3, 4], "value": [10.5, 20.3, 15.7, None], "text_column": ['jr', 'sss', 'ssw2', '346374']})
+    df = pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4],
+            "value": [10.5, 20.3, 15.7, None],
+            "text_column": ["jr", "sss", "ssw2", "346374"],
+        }
+    )
     df.to_csv(data, index=False)
     data.seek(0)
     return data
@@ -56,7 +62,13 @@ def sample_csv():
 def sample_excel():
     """Генерация тестового Excel"""
     data = BytesIO()
-    df = pd.DataFrame({"id": [1, 2, 3, 4], "value": [10.5, 20.3, 15.7, None], "text_column": ['jr', 'sss', 'ssw2', '346374']})
+    df = pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4],
+            "value": [10.5, 20.3, 15.7, None],
+            "text_column": ["jr", "sss", "ssw2", "346374"],
+        }
+    )
     with pd.ExcelWriter(data, engine="openpyxl") as writer:
         df.to_excel(writer, index=False)
     data.seek(0)

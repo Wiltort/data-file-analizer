@@ -81,9 +81,9 @@ class DataAnalysis(Base):
             return data
         if self.analysis_type == "cleaning":
             data = {
-                'duplicates_removed': self.duplicates_removed,
-                'missing_values_filled': self.missing_values_filled,
-                'cleaning_report': self.cleaning_report
+                "duplicates_removed": self.duplicates_removed,
+                "missing_values_filled": self.missing_values_filled,
+                "cleaning_report": self.cleaning_report,
             }
             return data
         raise RuntimeError("Invalid analysis type")
@@ -119,4 +119,3 @@ class DataPlot(Base):
 
     def __repr__(self):
         return f"<DataPlot {self.plot_type} for analysis {self.analysis_id}>"
-    
