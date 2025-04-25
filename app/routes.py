@@ -61,7 +61,8 @@ def get_stats(file_id):
     try:
         stats = analyze_data(file_id=file_id)
         return jsonify(stats)
-
+    except RuntimeError:
+        return jsonify({"error": "Invalid data format"}, 500)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -81,6 +82,8 @@ def get_cleaned_data(file_id):
             force=force,
         )
         return jsonify(resp), 202
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
