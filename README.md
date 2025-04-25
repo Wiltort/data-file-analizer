@@ -20,7 +20,7 @@ Analytical API service for data processing and visualization
 ## Installation
 - Clone repository
 ```bash
-    git clone https://github.com/yourusername/data-file-analizer.git
+    git clone https://github.com/Wiltort/data-file-analizer.git
     cd data-file-analizer
 ```
 
