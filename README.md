@@ -9,9 +9,10 @@ Analytical API service for data processing and visualization
     🗄️ PostgreSQL database storage
     🐳 Docker containerization
 # Technologies
-- Backend: Python 3.12, Flask
+- Backend: Python 3.12, Flask, SQLAlchemy
 - Database: PostgreSQL 13
 - Processing: Pandas, Matplotlib
+- AQ: Pytest
 - Infrastructure: Docker, Docker Compose
 # Quick Start
 ## Prerequisites
