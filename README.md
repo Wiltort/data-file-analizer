@@ -1,6 +1,11 @@
 # data-file-analizer
 Analytical API service for data processing and visualization
 
+![Python Version](https://img.shields.io/badge/Python-3.12-%233572A5)
+![Flask](https://img.shields.io/badge/Flask-2.0-%23000.svg?logo=flask)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13-%23336791.svg?logo=postgresql)
+![Docker](https://img.shields.io/badge/Docker-20.10+-%232496ED.svg?logo=docker)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 # Key Features
     📁 Upload CSV/XLSX files via API
